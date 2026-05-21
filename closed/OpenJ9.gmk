@@ -312,7 +312,7 @@ CMAKE_ARGS += $(EXTRA_CMAKE_ARGS)
 
 $(OUTPUT_ROOT)/vm/cmake.stamp :
 	@$(MKDIR) -p $(@D)
-cd $(@D) && $(CMAKE) $(CMAKE_ARGS) $(OPENJ9_TOPDIR_WIN)
+  cd $(@D) && $(CMAKE) $(CMAKE_ARGS) $(OPENJ9_TOPDIR_WIN)
 	$(TOUCH) $@
 
   # Both cmake and the makefiles it generates are sensitive to the VERBOSE
