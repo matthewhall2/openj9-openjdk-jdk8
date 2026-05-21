@@ -96,6 +96,20 @@ else
   UnixPath = $1
 endif
 
+ifeq (windows,$(OPENJDK_TARGET_OS))
+  # Convert paths to Windows format for CMake
+  OPENJ9_TOPDIR_WIN := $(shell $(CYGPATH) -m $(OPENJ9_TOPDIR))
+  OPENJ9OMR_TOPDIR_WIN := $(shell $(CYGPATH) -m $(OPENJ9OMR_TOPDIR))
+  BOOT_JDK_WIN := $(shell $(CYGPATH) -m $(BOOT_JDK))
+  OUTPUT_ROOT_WIN := $(shell $(CYGPATH) -m $(OUTPUT_ROOT))
+else
+  OPENJ9_TOPDIR_WIN := $(OPENJ9_TOPDIR)
+  OPENJ9OMR_TOPDIR_WIN := $(OPENJ9OMR_TOPDIR)
+  BOOT_JDK_WIN := $(BOOT_JDK)
+  OUTPUT_ROOT_WIN := $(OUTPUT_ROOT)
+endif
+
+
 .PHONY : \
 	build-j9vm \
 	generate-j9jcl-sources \
@@ -185,11 +199,11 @@ generate-j9-version-headers :
 	@$(ECHO) "===="
 
 CMAKE_ARGS := \
-	-C $(OPENJ9_TOPDIR)/runtime/cmake/caches/$(patsubst %_cross,%,$(OPENJ9_BUILDSPEC)).cmake \
-	-DBOOT_JDK=$(BOOT_JDK) \
-	-DBUILD_ID=$(BUILD_ID) \
-	-DCMAKE_TOOLCHAIN_FILE="$(OUTPUT_ROOT)/toolchain.cmake" \
-	-DJ9VM_OMR_DIR=$(OPENJ9OMR_TOPDIR) \
+  -C $(OPENJ9_TOPDIR_WIN)/runtime/cmake/caches/$(patsubst %_cross,%,$(OPENJ9_BUILDSPEC)).cmake \
+  -DBOOT_JDK=$(BOOT_JDK_WIN) \
+  -DBUILD_ID=$(BUILD_ID) \
+  -DCMAKE_TOOLCHAIN_FILE="$(OUTPUT_ROOT_WIN)/toolchain.cmake" \
+  -DJ9VM_OMR_DIR=$(OPENJ9OMR_TOPDIR_WIN) \
 	-DJAVA_SPEC_VERSION=8 \
 	-DOMR_DDR=$(OPENJ9_ENABLE_DDR) \
 	-DOMR_LINK_OPT=$(OPENJ9_ENABLE_LINK_OPT) \
@@ -298,7 +312,7 @@ CMAKE_ARGS += $(EXTRA_CMAKE_ARGS)
 
 $(OUTPUT_ROOT)/vm/cmake.stamp :
 	@$(MKDIR) -p $(@D)
-	cd $(@D) && $(CMAKE) $(CMAKE_ARGS) $(OPENJ9_TOPDIR)
+cd $(@D) && $(CMAKE) $(CMAKE_ARGS) $(OPENJ9_TOPDIR_WIN)
 	$(TOUCH) $@
 
   # Both cmake and the makefiles it generates are sensitive to the VERBOSE
